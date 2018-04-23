@@ -4,6 +4,7 @@ import asyncio
 
 class Vidobot(discord.Client):
     def __init__(self):
+
         self.OWNER_ID = '189726599556366336'
 
         super().__init__()
