@@ -7,6 +7,9 @@ USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36
 
 
 def link(search_term):
+    if "youtube.com/watch?v=" in search_term:
+        return search_term
+
     search_term = ' '.join(search_term)
     query = urllib.parse.quote(search_term)
     url = "https://www.youtube.com/results?search_query=" + query

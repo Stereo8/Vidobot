@@ -6,6 +6,7 @@ class Vidobot(discord.Client):
     def __init__(self):
 
         self.OWNER_ID = '189726599556366336'
+        self.BOT_PREFIX = '++,'
         self.queue = list()
 
         super().__init__()
@@ -22,6 +23,9 @@ class Vidobot(discord.Client):
             await self.close()
         else:
             await self.send_message(message.channel, "Ja se povinujem samo Vidu, ti si uljez!")
+
+    def skip(self):
+        self.queue[0][0].stop()
 
     def after_song(self):
         del self.queue[0]
@@ -52,18 +56,29 @@ class Vidobot(discord.Client):
             player.start()
             await self.send_message(message.channel, "Puštam **%s** za *%s*..." % (player.title, name))
 
-
+    async def lista(self, message):
+        q = ""
+        for link in self.queue:
+            q += "%s - **%s**, za *%s*\n" % (self.queue.index(link) + 1, link[0].title, link[2])
+        await self.send_message(message.channel, q)
 
     async def on_message(self, message):
         print("<%s %s>[%s] %s" % (message.server, message.channel, message.author, message.content))
         args = message.content.split(" ")
         command = args[1]
 
-        if command == "dodji":
-            await self.dodji(message.author.voice_channel, message.channel)
+        if args[0] == self.BOT_PREFIX:
+            if command == "dodji":
+                await self.dodji(message.author.voice_channel, message.channel)
 
-        if command == "umri":
-            await self.umri(message)
+            if command == "umri":
+                await self.umri(message)
 
-        if command == "pusti":
-            await self.pusti(message)
+            if command == "pusti":
+                await self.pusti(message)
+
+            if command == "skip":
+                self.skip()
+
+            if command == "lista" or command == 'q':
+                await self.lista(message)
