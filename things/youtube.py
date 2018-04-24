@@ -16,6 +16,7 @@ def link(search_term):
     response = requests.get(url, headers={'User Agent': USER_AGENT})
     soup = BeautifulSoup(response.text, 'lxml')
     for vid in soup.findAll(attrs={'class': 'yt-uix-tile-link'}):
-        return 'https://www.youtube.com' + vid['href']
+        if not vid['href'].startswith("https://googleads.g.doubleclick.net/"):
+            return 'https://www.youtube.com' + vid['href']
     else:
         raise Exception

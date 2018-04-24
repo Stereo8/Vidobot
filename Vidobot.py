@@ -47,11 +47,21 @@ class Vidobot(discord.Client):
         name = message.author.nick if message.author.nick is not None else message.author.name
 
         if len(self.queue) > 0 and self.queue[0][0].is_playing():
-            player = await voice_client.create_ytdl_player(youtube.link(search_term), after=self.after_song)
+            try:
+                player = await voice_client.create_ytdl_player(youtube.link(search_term), after=self.after_song)
+            except Exception:
+                await self.send_message(message.channel, "Sjebalo se nešto kod traženja, pokušaj sa linkom ili "
+                                                         "drugačije napiši")
+                return
             self.queue.append([player, message.channel, name])
             await self.send_message(message.channel, "Dodah **%s** u listu za *%s*..." % (player.title, name))
         else:
-            player = await voice_client.create_ytdl_player(youtube.link(search_term), after=self.after_song)
+            try:
+                player = await voice_client.create_ytdl_player(youtube.link(search_term), after=self.after_song)
+            except Exception:
+                await self.send_message(message.channel, "Sjebalo se nešto kod traženja, pokušaj sa linkom ili "
+                                                         "drugačije napiši")
+                return
             self.queue.append([player, message.channel, name])
             player.start()
             await self.send_message(message.channel, "Puštam **%s** za *%s*..." % (player.title, name))
@@ -61,6 +71,12 @@ class Vidobot(discord.Client):
         for link in self.queue:
             q += "%s - **%s**, za *%s*\n" % (self.queue.index(link) + 1, link[0].title, link[2])
         await self.send_message(message.channel, q)
+
+    async def mars(self, message):
+        await self.send_message(message.channel, "Odjebavam iz *%s*..." %self.voice_client_in(
+                message.server).channel.name)
+        await self.voice_client_in(message.server).disconnect()
+
 
     async def on_message(self, message):
         print("<%s %s>[%s] %s" % (message.server, message.channel, message.author, message.content))
@@ -82,3 +98,6 @@ class Vidobot(discord.Client):
 
             if command == "lista" or command == 'q':
                 await self.lista(message)
+
+            if command == "mars" or command == "mrs":
+                await self.mars(message)
