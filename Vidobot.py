@@ -1,5 +1,6 @@
 import discord
 import asyncio
+from things import fortnite
 from things import youtube
 
 class Vidobot(discord.Client):
@@ -77,11 +78,35 @@ class Vidobot(discord.Client):
                 message.server).channel.name)
         await self.voice_client_in(message.server).disconnect()
 
+    async def fortnite(self, name, message):
+        player = fortnite.FortnitePlayer(name)
+
+        embed = discord.Embed(title="Fortnite stats od %s" % (player.display_name),
+                              description="%s - Pobede - %d - Winrate - %.2f%% - Mečevi - %d" % (
+                              player.display_name, player.wins, player.winrate, player.matches_played),
+                              color=0x00ff00)
+        embed.add_field(name='Solo',
+                        value='K/D - **%.2f** | Pobede - **%d** | Killovi - **%d** | Winrate - **%.2f%%** |  Mečevi - '
+                              '**%d**' % (player.solo.kpd, player.solo.wins, player.solo.kills, player.solo.win_rate, 
+                                          player.solo.matches_played))
+        embed.add_field(name='Duo',
+                        value='K/D - **%.2f** | Pobede - **%d** | Killovi - **%d** | Winrate - **%.2f%%** |  Mečevi - '
+                              '**%d**' % (player.duo.kpd, player.duo.wins, player.duo.kills, player.duo.win_rate,
+                                          player.duo.matches_played))
+        embed.add_field(name='Squad',
+                        value='K/D - **%.2f** | Pobede - **%d** | Killovi - **%d** | Winrate - **%.2f%%** |  Mečevi - '
+                              '**%d**' % (player.squad.kpd, player.squad.wins, player.squad.kills, player.squad.win_rate,
+                                          player.squad.matches_played))
+        embed.set_footer(text="powered by Vidobot++™")
+        await self.send_message(message.channel, embed=embed)
 
     async def on_message(self, message):
         print("<%s %s>[%s] %s" % (message.server, message.channel, message.author, message.content))
         args = message.content.split(" ")
-        command = args[1]
+        if len(args) < 2:
+            return
+        else:
+            command = args[1]
 
         if args[0] == self.BOT_PREFIX:
             if command == "dodji":
@@ -101,3 +126,6 @@ class Vidobot(discord.Client):
 
             if command == "mars" or command == "mrs":
                 await self.mars(message)
+
+            if command == "fortnite":
+                await self.fortnite(' '.join(args[2:]), message)
