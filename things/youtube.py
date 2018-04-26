@@ -13,7 +13,8 @@ def link(search_term):
     search_term = ' '.join(search_term)
     query = urllib.parse.quote(search_term)
     url = "https://www.youtube.com/results?search_query=" + query
-    response = requests.get(url, headers={'User Agent': USER_AGENT})
+    response = requests.get(url)
+    # response = requests.get(url, headers={'User Agent': USER_AGENT})
     soup = BeautifulSoup(response.text, 'lxml')
     for vid in soup.findAll(attrs={'class': 'yt-uix-tile-link'}):
         if not vid['href'].startswith("https://googleads.g.doubleclick.net/"):
