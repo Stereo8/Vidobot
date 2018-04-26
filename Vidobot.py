@@ -2,6 +2,7 @@ import discord
 import asyncio
 from things import fortnite
 from things import youtube
+from things import paki
 
 class Vidobot(discord.Client):
     def __init__(self):
@@ -106,6 +107,19 @@ class Vidobot(discord.Client):
             embed.set_footer(text="powered by Vidobot++™")
             await self.send_message(message.channel, embed=embed)
 
+    async def purge(self, message: discord.Message, number):
+        if message.author.permissions_in(message.channel).manage_messages:
+            try:
+                await self.purge_from(message.channel, limit=int(number))
+            except ValueError:
+                await self.send_message(message.channel, "Napiši broj poruka slovima mentolu")
+        else:
+            await self.send_message(message.channel, "Nemaš ti tu moć, smrtniče ubogi")
+
+    async def paki(self, channel: discord.Channel):
+        await self.send_message(channel, "Naš drugar Paki ima *%s* sabskrajbera! Svaka čast!" % (
+            paki.pakijev_subcount()))
+
     async def on_message(self, message):
         print("<%s %s>[%s] %s" % (message.server, message.channel, message.author, message.content))
         args = message.content.split(" ")
@@ -135,3 +149,9 @@ class Vidobot(discord.Client):
 
             if command == "fortnite":
                 await self.fortnite(' '.join(args[2:]), message)
+
+            if command == "purge":
+                await self.purge(message, args[2])
+
+            if command.startswith("paki"):
+                await self.paki(message.channel)
