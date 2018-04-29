@@ -4,6 +4,7 @@ from things import fortnite
 from things import youtube
 from things import paki
 
+
 class Vidobot(discord.Client):
     def __init__(self):
 
@@ -14,10 +15,10 @@ class Vidobot(discord.Client):
         super().__init__()
 
     async def dodji(self, voice_channel: discord.Channel, text_channel: discord.Channel):
-            try:
-                return await self.join_voice_channel(voice_channel)
-            except discord.errors.InvalidArgument:
-                await self.send_message(text_channel, "Moraš da budeš u voice kanalu retardu.")
+        try:
+            return await self.join_voice_channel(voice_channel)
+        except discord.errors.InvalidArgument:
+            await self.send_message(text_channel, "Moraš da budeš u voice kanalu retardu.")
 
     async def umri(self, message: discord.Message):
         if message.author.id == self.OWNER_ID:
@@ -75,7 +76,7 @@ class Vidobot(discord.Client):
         await self.send_message(message.channel, q)
 
     async def mars(self, message):
-        await self.send_message(message.channel, "Odjebavam iz *%s*..." %self.voice_client_in(
+        await self.send_message(message.channel, "Odjebavam iz *%s*..." % self.voice_client_in(
                 message.server).channel.name)
         await self.voice_client_in(message.server).disconnect()
 
@@ -90,20 +91,22 @@ class Vidobot(discord.Client):
 
             embed = discord.Embed(title="Fortnite stats od %s" % (player.display_name),
                                   description="%s - Pobede - %d - Winrate - %.2f%% - Mečevi - %d" % (
-                                  player.display_name, player.wins, player.winrate, player.matches_played),
+                                      player.display_name, player.wins, player.winrate, player.matches_played),
                                   color=0x00ff00)
             embed.add_field(name='Solo',
                             value='K/D - **%.2f** | Pobede - **%d** | Killovi - **%d** | Winrate - **%.2f%%** |  Mečevi - '
-                                  '**%d**' % (player.solo.kpd, player.solo.wins, player.solo.kills, player.solo.win_rate,
-                                              player.solo.matches_played))
+                                  '**%d**' % (
+                                  player.solo.kpd, player.solo.wins, player.solo.kills, player.solo.win_rate,
+                                  player.solo.matches_played))
             embed.add_field(name='Duo',
                             value='K/D - **%.2f** | Pobede - **%d** | Killovi - **%d** | Winrate - **%.2f%%** |  Mečevi - '
                                   '**%d**' % (player.duo.kpd, player.duo.wins, player.duo.kills, player.duo.win_rate,
                                               player.duo.matches_played))
             embed.add_field(name='Squad',
                             value='K/D - **%.2f** | Pobede - **%d** | Killovi - **%d** | Winrate - **%.2f%%** |  Mečevi - '
-                                  '**%d**' % (player.squad.kpd, player.squad.wins, player.squad.kills, player.squad.win_rate,
-                                              player.squad.matches_played))
+                                  '**%d**' % (
+                                  player.squad.kpd, player.squad.wins, player.squad.kills, player.squad.win_rate,
+                                  player.squad.matches_played))
             embed.set_footer(text="powered by Vidobot++™")
             await self.send_message(message.channel, embed=embed)
 
@@ -115,6 +118,32 @@ class Vidobot(discord.Client):
                 await self.send_message(message.channel, "Napiši broj poruka slovima mentolu")
         else:
             await self.send_message(message.channel, "Nemaš ti tu moć, smrtniče ubogi")
+
+    async def kikuj(self, message):
+        if message.author.server_permissions.kick_members and len(message.mentions) > 0:
+            for member in message.mentions:
+                try:
+                    await self.kick(member)
+                    await self.send_message(message.channel, "Kikovah %s!" % (member.name))
+                except discord.Forbidden:
+                    await self.send_message(message.channel, "Ne mogu da kikujem %s!" % (member.name))
+        elif not message.author.server_permissions.kick_members:
+            await self.send_message(message.channel, "Nemaš ti tu moć, smrtniče ubogi")
+        elif len(message.mentions) == 0:
+            await self.send_message(message.channel, "Moraš da ih menšnuješ tebra")
+
+    async def banuj(self, message):
+        if message.author.server_permissions.ban_members and len(message.mentions) > 0:
+            for member in message.mentions:
+                try:
+                    await self.ban(member)
+                    await self.send_message(message.channel, "Banovah %s!" % (member.name))
+                except discord.Forbidden:
+                    await self.send_message(message.channel, "Ne mogu da banujem %s!" % (member.name))
+        elif not message.author.server_permissions.ban_members:
+            await self.send_message(message.channel, "Nemaš ti tu moć, smrtniče ubogi")
+        elif len(message.mentions) == 0:
+            await self.send_message(message.channel, "Moraš da ih menšnuješ tebra")
 
     async def paki(self, channel: discord.Channel):
         await self.send_message(channel, "Naš drugar Paki ima *%s* sabskrajbera! Svaka čast!" % (
@@ -152,6 +181,12 @@ class Vidobot(discord.Client):
 
             if command == "purge":
                 await self.purge(message, args[2])
+
+            if command == "kikuj":
+                await self.kikuj(message)
+
+            if command == "banuj":
+                await self.banuj(message)
 
             if command.startswith("paki"):
                 await self.paki(message.channel)
