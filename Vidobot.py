@@ -49,8 +49,6 @@ class Vidobot(discord.Client):
         try:
             search_term = kwargs['search_term']
         except KeyError:
-            pass
-        else:
             search_term = message.content.split(' ')[2:]
         await self.send_typing(message.channel)
         search_term = ' '.join(search_term)
