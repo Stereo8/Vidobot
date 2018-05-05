@@ -1,5 +1,4 @@
 import discord
-import asyncio
 from things import fortnite
 from things import youtube
 from things import paki
@@ -50,8 +49,8 @@ class Vidobot(discord.Client):
             search_term = kwargs['search_term']
         except KeyError:
             search_term = message.content.split(' ')[2:]
+            search_term = ' '.join(search_term)
         await self.send_typing(message.channel)
-        search_term = ' '.join(search_term)
         name = message.author.nick if message.author.nick is not None else message.author.name
 
         if len(self.queue) > 0 and self.queue[0][0].is_playing():
@@ -91,7 +90,7 @@ class Vidobot(discord.Client):
             self.send_message(message.channel, "Debilčino, rekao sam broj od jedan do pet.")
             return
 
-        await self.pusti(message, search_term=int(msg.content) - 1)
+        await self.pusti(message, search_term=results[int(msg.content) - 1])
         await self.delete_message(delmes)
         await self.delete_message(msg)
 
