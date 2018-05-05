@@ -3,6 +3,7 @@ import asyncio
 from things import fortnite
 from things import youtube
 from things import paki
+from things import ph
 import time
 
 
@@ -159,6 +160,9 @@ class Vidobot(discord.Client):
         await voice.disconnect()
         await self.delete_message(message)
 
+    async def pornhub(self, channel: discord.Channel):
+        await self.send_message(channel, ph.comment())
+
     async def on_message(self, message: discord.Message):
         print("<%s %s>[%s] %s" % (message.server, message.channel, message.author, message.content))
         args = message.content.split(" ")
@@ -203,3 +207,6 @@ class Vidobot(discord.Client):
 
             if command.startswith("paki"):
                 await self.paki(message.channel)
+
+            if command == "pornhub":
+                await self.pornhub(message.channel)
