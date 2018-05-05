@@ -17,7 +17,26 @@ def link(search_term):
     # response = requests.get(url, headers={'User Agent': USER_AGENT})
     soup = BeautifulSoup(response.text, 'lxml')
     for vid in soup.findAll(attrs={'class': 'yt-uix-tile-link'}):
-        if not vid['href'].startswith("https://googleads.g.doubleclick.net/"):
+        if '/user/' not in vid['href'] and '?list=' not in vid['href'] and not vid['href'].startswith(
+                "https://googleads.g.doubleclick.net/"):
             return 'https://www.youtube.com' + vid['href']
     else:
         raise Exception
+
+
+def links(search_term):
+    """Gets 5 first search results from given terms"""
+    c = 0
+    search_term = ' '.join(search_term)
+    songs = []
+    query = urllib.parse.quote(search_term)
+    url = "https://www.youtube.com/results?search_query=" + query
+    response = requests.get(url)
+    soup = BeautifulSoup(response.text, 'lxml')
+    for vid in soup.findAll(attrs={'class': 'yt-uix-tile-link'}):
+        if '?list=' not in vid['href'] and '/user/' not in vid['href'] and not vid['href'].startswith(
+                "https://googleads.g.doubleclick.net/"):
+            songs.append(['https://www.youtube.com' + vid['href'], vid.contents[-1]])
+            c = c + 1
+        if c == 5:
+            return songs

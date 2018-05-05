@@ -37,7 +37,7 @@ class Vidobot(discord.Client):
         self.queue[0][0].start()
         # TODO: fucking song name
 
-    async def pusti(self, message: discord.Message):
+    async def pusti(self, message: discord.Message, **kwargs):
         # is the user even in a voice channel? is the bot? dodji() will take care of that.
         if self.is_voice_connected(message.server):
             voice_client = message.server.voice_client
@@ -46,7 +46,12 @@ class Vidobot(discord.Client):
             if not self.is_voice_connected(message.server):
                 return
 
-        search_term = message.content.split(' ')[2:]
+        try:
+            search_term = kwargs['search_term']
+        except KeyError:
+            pass
+        else:
+            search_term = message.content.split(' ')[2:]
         await self.send_typing(message.channel)
         search_term = ' '.join(search_term)
         name = message.author.nick if message.author.nick is not None else message.author.name
@@ -70,6 +75,27 @@ class Vidobot(discord.Client):
             self.queue.append([player, message.channel, name])
             player.start()
             await self.send_message(message.channel, "Puštam **%s** za *%s*..." % (player.title, name))
+
+    async def pesme(self, message, search_term):
+
+        def check(msg):
+                if int(msg.content) in range(0, 5):
+                    return True
+
+        results = youtube.links(search_term)
+        delmes = await self.send_message(message.channel, "Izaberi jedan od izbora: \n**1.** %s \n**2.** %s \n**3.** "
+                                                          "%s "
+                                                          "\n**4.** %s \n**5.** %s " % (
+                                         results[0][1], results[1][1], results[2][1], results[3][1], results[4][1]))
+        try:
+            msg = await self.wait_for_message(timeout=15.0, author=message.author, channel=message.channel, check=check)
+        except ValueError:
+            self.send_message(message.channel, "Debilčino, rekao sam broj od jedan do pet.")
+            return
+
+        await self.pusti(message, search_term=int(msg.content) - 1)
+        await self.delete_message(delmes)
+        await self.delete_message(msg)
 
     async def lista(self, message):
         q = ""
@@ -98,8 +124,8 @@ class Vidobot(discord.Client):
             embed.add_field(name='Solo',
                             value='K/D - **%.2f** | Pobede - **%d** | Killovi - **%d** | Winrate - **%.2f%%** |  Mečevi - '
                                   '**%d**' % (
-                                  player.solo.kpd, player.solo.wins, player.solo.kills, player.solo.win_rate,
-                                  player.solo.matches_played))
+                                      player.solo.kpd, player.solo.wins, player.solo.kills, player.solo.win_rate,
+                                      player.solo.matches_played))
             embed.add_field(name='Duo',
                             value='K/D - **%.2f** | Pobede - **%d** | Killovi - **%d** | Winrate - **%.2f%%** |  Mečevi - '
                                   '**%d**' % (player.duo.kpd, player.duo.wins, player.duo.kills, player.duo.win_rate,
@@ -107,8 +133,8 @@ class Vidobot(discord.Client):
             embed.add_field(name='Squad',
                             value='K/D - **%.2f** | Pobede - **%d** | Killovi - **%d** | Winrate - **%.2f%%** |  Mečevi - '
                                   '**%d**' % (
-                                  player.squad.kpd, player.squad.wins, player.squad.kills, player.squad.win_rate,
-                                  player.squad.matches_played))
+                                      player.squad.kpd, player.squad.wins, player.squad.kills, player.squad.win_rate,
+                                      player.squad.matches_played))
             embed.set_footer(text="powered by Vidobot++™")
             await self.send_message(message.channel, embed=embed)
 
@@ -180,6 +206,9 @@ class Vidobot(discord.Client):
 
             if command == "pusti":
                 await self.pusti(message)
+
+            if command == "youtube":
+                await self.pesme(message, ' '.join(args[2:]))
 
             if command == "skip":
                 self.skip()
