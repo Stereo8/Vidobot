@@ -3,6 +3,7 @@ import asyncio
 from things import fortnite
 from things import youtube
 from things import paki
+import time
 
 
 class Vidobot(discord.Client):
@@ -141,15 +142,24 @@ class Vidobot(discord.Client):
                 except discord.Forbidden:
                     await self.send_message(message.channel, "Ne mogu da banujem %s!" % (member.name))
         elif not message.author.server_permissions.ban_members:
-            await self.send_message(message.channel, "Nemaš ti tu moć, smrtniče ubogi")
+            await self.send_message(message.channel, "Nemaš ti tu moć, smrtniče ubogi.")
         elif len(message.mentions) == 0:
-            await self.send_message(message.channel, "Moraš da ih menšnuješ tebra")
+            await self.send_message(message.channel, "Moraš da ih menšnuješ tebra.")
 
     async def paki(self, channel: discord.Channel):
         await self.send_message(channel, "Naš drugar Paki ima *%s* sabskrajbera! Svaka čast!" % (
             paki.pakijev_subcount()))
 
-    async def on_message(self, message):
+    async def reciga(self, message: discord.Message):
+        voice = await self.dodji(message.author.voice_channel, message.channel)
+        player = voice.create_ffmpeg_player('things/ALUBULJUE.mp3')
+        player.volume = 2
+        player.start()
+        time.sleep(1.6)
+        await voice.disconnect()
+        await self.delete_message(message)
+
+    async def on_message(self, message: discord.Message):
         print("<%s %s>[%s] %s" % (message.server, message.channel, message.author, message.content))
         args = message.content.split(" ")
         if len(args) < 2:
@@ -187,6 +197,9 @@ class Vidobot(discord.Client):
 
             if command == "banuj":
                 await self.banuj(message)
+
+            if message.content.startswith(self.BOT_PREFIX + " reci ga"):
+                await self.reciga(message)
 
             if command.startswith("paki"):
                 await self.paki(message.channel)
