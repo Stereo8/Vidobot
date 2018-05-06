@@ -1,9 +1,9 @@
 import discord
-import asyncio
 from things import fortnite
 from things import youtube
 from things import paki
 from things import ph
+from things import status
 import time
 
 
@@ -49,11 +49,9 @@ class Vidobot(discord.Client):
         try:
             search_term = kwargs['search_term']
         except KeyError:
-            pass
-        else:
             search_term = message.content.split(' ')[2:]
+            search_term = ' '.join(search_term)
         await self.send_typing(message.channel)
-        search_term = ' '.join(search_term)
         name = message.author.nick if message.author.nick is not None else message.author.name
 
         if len(self.queue) > 0 and self.queue[0][0].is_playing():
@@ -93,7 +91,7 @@ class Vidobot(discord.Client):
             self.send_message(message.channel, "Debilčino, rekao sam broj od jedan do pet.")
             return
 
-        await self.pusti(message, search_term=int(msg.content) - 1)
+        await self.pusti(message, search_term=results[int(msg.content) - 1])
         await self.delete_message(delmes)
         await self.delete_message(msg)
 
@@ -189,6 +187,11 @@ class Vidobot(discord.Client):
     async def pornhub(self, channel: discord.Channel):
         await self.send_message(channel, ph.comment())
 
+    async def status(self, message):
+        await self.send_message(message.channel, "{0} \n"
+                                                 "{1} \n"
+                                                 "{2} \n".format(status.cpu(), status.memory(), status.load_avg()))
+
     async def on_message(self, message: discord.Message):
         print("<%s %s>[%s] %s" % (message.server, message.channel, message.author, message.content))
         args = message.content.split(" ")
@@ -239,3 +242,6 @@ class Vidobot(discord.Client):
 
             if command == "pornhub":
                 await self.pornhub(message.channel)
+
+            if command == "status":
+                await self.status(message)
