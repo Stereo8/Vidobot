@@ -3,6 +3,7 @@ from things import fortnite
 from things import youtube
 from things import paki
 from things import ph
+from things import status
 import time
 
 
@@ -186,6 +187,11 @@ class Vidobot(discord.Client):
     async def pornhub(self, channel: discord.Channel):
         await self.send_message(channel, ph.comment())
 
+    async def status(self, message):
+        await self.send_message(message.channel, "{0} \n"
+                                                 "{1} \n"
+                                                 "{2} \n".format(status.cpu(), status.memory(), status.load_avg()))
+
     async def on_message(self, message: discord.Message):
         print("<%s %s>[%s] %s" % (message.server, message.channel, message.author, message.content))
         args = message.content.split(" ")
@@ -236,3 +242,6 @@ class Vidobot(discord.Client):
 
             if command == "pornhub":
                 await self.pornhub(message.channel)
+
+            if command == "status":
+                await self.status(message)
