@@ -10,32 +10,26 @@ def link(search_term):
     if "youtube.com/watch?v=" in search_term:
         return search_term
 
-    search_term = ' '.join(search_term)
-    query = urllib.parse.quote(search_term)
-    url = "https://www.youtube.com/results?search_query=" + query
-    response = requests.get(url)
-    # response = requests.get(url, headers={'User Agent': USER_AGENT})
-    soup = BeautifulSoup(response.text, 'lxml')
+    payload = {'search_query': search_term}
+
+    request = requests.get("https://www.youtube.com/results", params=payload)
+    soup = BeautifulSoup(request.text, 'lxml')
+    # print(request.url)
+
     for vid in soup.findAll(attrs={'class': 'yt-uix-tile-link'}):
-        if '/user/' not in vid['href'] and '?list=' not in vid['href'] and not vid['href'].startswith(
-                "https://googleads.g.doubleclick.net/"):
+        if 'list' not in vid['href'] and 'radio' not in vid['href'] and 'googleads' not in vid['href']:
             return 'https://www.youtube.com' + vid['href']
-    else:
-        raise Exception
 
 
 def links(search_term):
     """Gets 5 first search results from given terms"""
     c = 0
-    search_term = ' '.join(search_term)
     songs = []
-    query = urllib.parse.quote(search_term)
-    url = "https://www.youtube.com/results?search_query=" + query
-    response = requests.get(url)
+    payload = {'search_query': search_term}
+    response = requests.get("https://www.youtube.com/results", params=payload)
     soup = BeautifulSoup(response.text, 'lxml')
     for vid in soup.findAll(attrs={'class': 'yt-uix-tile-link'}):
-        if '?list=' not in vid['href'] and '/user/' not in vid['href'] and not vid['href'].startswith(
-                "https://googleads.g.doubleclick.net/"):
+        if 'list' not in vid['href'] and 'radio' not in vid['href'] and 'googleads' not in vid['href']:
             songs.append(['https://www.youtube.com' + vid['href'], vid.contents[-1]])
             c = c + 1
         if c == 5:
